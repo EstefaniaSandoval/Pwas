@@ -232,8 +232,7 @@ function setup() {
     nextNode2: -1
   });
 }
-
-function draw() {
+function draw() { 
   // Dibuja la imagen de fondo ajustando el tamaño sin distorsionar las proporciones
   background(255); // Fondo blanco en caso de que la imagen no cubra toda la pantalla
   let imgAspect = bgImage.width / bgImage.height; // Proporción de la imagen
@@ -249,33 +248,46 @@ function draw() {
 
   // Solo mostrar el contenido cuando no estamos en transición
   if (!transitioning) {
+    // Escala de la tarjeta y texto en función del tamaño de la pantalla
+    let cardWidth = width * 0.8; // El 80% del ancho de la pantalla
+    let cardHeight = height * 0.35; // Mayor altura para evitar que se corte el texto
+    let cardX = (width - cardWidth) / 2; // Centrar la tarjeta en el ancho
+    let cardY = height / 4; // Ubicación en la parte superior de la pantalla
+
+    // Tarjeta de historia
     fill(255, 220, 185, 200); // Tarjeta semi-transparente
-    rect(width / 4, height / 4, width / 2, 150, 20); // Tarjeta de historia
+    rect(cardX, cardY, cardWidth, cardHeight, 20); // Tarjeta de historia
 
     // Configuración del texto
     fill(0); // Texto negro
     textAlign(LEFT, TOP); // Alineación del texto
-    textSize(20); // Tamaño del texto
+    textSize(width / 30); // Tamaño del texto más pequeño para evitar cortes
     textWrap(WORD); // Ajustar el texto a las palabras
 
     // Definir el área del texto dentro de la tarjeta
-    let textBoxX = width / 4 + 20; // Margen izquierdo de la tarjeta
-    let textBoxY = height / 4 + 20; // Margen superior de la tarjeta
-    let textBoxWidth = width / 2 - 40; // Ancho del área de texto
-    let textBoxHeight = 110; // Altura del área de texto
+    let textBoxX = cardX + 20; // Margen izquierdo de la tarjeta
+    let textBoxY = cardY + 20; // Margen superior de la tarjeta
+    let textBoxWidth = cardWidth - 40; // Ancho del área de texto
+    let textBoxHeight = cardHeight - 40; // Altura del área de texto
 
     // Mostrar el texto de la historia actual dentro de la tarjeta
     text(story[currentNode].text, textBoxX, textBoxY, textBoxWidth, textBoxHeight);
 
-    // Mostrar opciones
-    fill(200, 255, 200, 200); // Tarjetas semi-transparente para opciones
-    rect(width / 4, height / 2 + 20, width / 2, 50, 10); // Opción 1
-    rect(width / 4, height / 2 + 100, width / 2, 50, 10); // Opción 2
+    // Opciones
+    let optionBoxHeight = height * 0.1; // Altura de las opciones ajustada
+    let optionY1 = height / 2 + 20;
+    let optionY2 = height / 2 + 20 + optionBoxHeight + 20; // Espacio entre las opciones
 
-    fill(0); // Texto de las opciones
+    fill(200, 255, 200, 200); // Tarjetas semi-transparente para opciones
+    rect(cardX, optionY1, cardWidth, optionBoxHeight, 10); // Opción 1
+    rect(cardX, optionY2, cardWidth, optionBoxHeight, 10); // Opción 2
+
+    // Texto de las opciones
+    fill(0); // Texto negro
     textAlign(CENTER, CENTER); // Centrar el texto de las opciones
-    text(story[currentNode].option1, width / 2, height / 2 + 45);
-    text(story[currentNode].option2, width / 2, height / 2 + 125);
+    textSize(width / 35); // Texto más pequeño para opciones
+    text(story[currentNode].option1, width / 2, optionY1 + optionBoxHeight / 2);
+    text(story[currentNode].option2, width / 2, optionY2 + optionBoxHeight / 2);
   }
 
   // Transición de desvanecimiento
@@ -287,44 +299,42 @@ function draw() {
 
     if (fade >= 255) {
       fade = 255;
-      // Cambio el nodo cuando la pantalla está completamente blanca
       currentNode = nextNode;
-      transitioning = false; // Fin de la transición
-      fadeSpeed = -fadeSpeed; // Invertir la dirección del fade
+      transitioning = false;
+      fadeSpeed = -fadeSpeed;
     }
   } else if (fade > 0) {
-    // Reducir la opacidad una vez que la transición termine
     fill(255, fade);
     rect(0, 0, width, height);
     fade += fadeSpeed;
     if (fade <= 0) {
       fade = 0;
-      fadeSpeed = -fadeSpeed; // Preparar la animación para la siguiente vez
+      fadeSpeed = -fadeSpeed;
     }
   }
 }
 
 function mousePressed() {
-  // Evitar que se interactúe mientras se está en transición
   if (transitioning) {
-    return; // No hacer nada si estamos en transición
+    return;
   }
 
-  // Comprobar si el ratón está dentro de las áreas de las opciones
-  if (mouseY > height / 2 + 20 && mouseY < height / 2 + 70) {
-    nextNode = story[currentNode].nextNode1; // Guardar el siguiente nodo
-    transitioning = true; // Iniciar la transición
-  } else if (mouseY > height / 2 + 100 && mouseY < height / 2 + 150) {
-    nextNode = story[currentNode].nextNode2; // Guardar el siguiente nodo
-    transitioning = true; // Iniciar la transición
+  // Verificar si se presionó en las áreas de las opciones
+  let optionBoxHeight = height * 0.1; // Ajustar altura de las opciones
+  if (mouseY > height / 2 + 20 && mouseY < height / 2 + 20 + optionBoxHeight) {
+    nextNode = story[currentNode].nextNode1;
+    transitioning = true;
+  } else if (mouseY > height / 2 + 100 && mouseY < height / 2 + 100 + optionBoxHeight) {
+    nextNode = story[currentNode].nextNode2;
+    transitioning = true;
   }
 
-  // Si el usuario selecciona "Salir", el programa termina
+  // Si el nodo actual es -1 (Salir), detener el loop
   if (currentNode === -1) {
     noLoop();
   }
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight); // Ajusta el canvas si la ventana se redimensiona
+  resizeCanvas(windowWidth, windowHeight);
 }
